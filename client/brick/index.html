@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html><head>
+
+	<title> Brick Breaker </title>
+  	<meta name="root" content="user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, width=device-width, height=device-height" charset="utf-8" />
+  
+  	<style>
+    	/* { margin: 0; padding: 0; border: none; }*/
+    	body { overflow: hidden;  color: #888; }
+    	body,html { height: 100%; width: 100%; font-family: sans-serif; }
+    	canvas {  margin: auto; margin-top: 40px; display:block; border-width: : 2px; border-style: solid;}
+    	input { width: 80% }
+  	</style>
+  	<link rel="stylesheet" type="text/css" href="modal.css">
+	<script type="text/javascript" src="https://code.createjs.com/1.0.0/easeljs.min.js"></script> 
+	<script type="text/javascript" src="https://code.createjs.com/1.0.0/preloadjs.min.js"></script>  
+	
+	<script type="text/javascript" src="app.js"></script>
+</head><body onload="init();">
+
+ 	<canvas id="brickbreaker" width="600" height="600"></canvas>
+ 	<canvas id="scoreboard" width="600"></canvas>
+
+ 	<div id="modal" class="modal" width="600">
+ 	  		<div class="modal-content">
+    		<span class="close" id="close">&times;</span>
+    		<p>Welcome! please enter a name</p>
+    		<input id="input" type="text" name="yes" placeholder="Name please" required>
+ 		</div>
+	 </div>	
+
+</body></html>
