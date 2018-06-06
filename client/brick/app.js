@@ -1,11 +1,14 @@
 var canvas;
 var stage;
+var scoreboard;
+var scorestage;
 
 var vel = 2, velx = 2, vely = -2;
 var block;
 var paddle;
 var messenger; 
 var scoreField;
+var scoreboard_text=[];
 var levelField;
 var bricks = [];			//bricklist
 
@@ -13,6 +16,8 @@ var preload;				//preload files
 
 var difficulty = 0;
 var score = 0;
+var scores;
+var submitted = false; 		// for submitting only once
 
 var KEYCODE_LEFT = 37;		//useful keycode
 var KEYCODE_RIGHT = 39;		//useful keycode
@@ -28,6 +33,40 @@ var modal;
 var modal_close;
 
 var username = "";
+
+var url;
+var submit_url;
+var highscore_url;
+var submitscore = function(score, callback){
+	console.log("submit called")
+	$.post(submit_url, {name:escape(username), score:score}, function(data){
+		if(!data){
+			console.log("Communication error with server");
+			callback && callback(false);
+		}
+		if(data.error){
+			console.log("Server error: " + data.error);
+			callback && callback(false);
+		}
+		callback && callback(true);
+	})
+}
+
+
+var highscore = function(callback){
+	console.log("highscore called")
+	$.post(highscore_url, null, function(data){
+		if(!data){
+			console.log("Communication error with server");
+			callback && callback(false);
+		}
+		if(data.error){
+			console.log("Server error: " + data.error);
+			callback && callback(false);
+		}
+		callback && callback(data);
+	})
+}
 
 function load(){
 	preload = new createjs.LoadQueue(true, '');
@@ -94,10 +133,19 @@ function init(){
 	modal  = document.getElementById('modal');
 	modal_close = document.getElementById('close');
 	modal_close.onclick = close_modal;
+	url = document.URL;
+	highscore_url = url.slice(0, url.length-1)+"_server/highScore";
+	submit_url = url.slice(0, url.length-1)+"_server/submitScore";
+	highscore(function(data){
+		scores = data.score;
+		updatescoreboard_text();
+	})
 
+	console.log(highscore_url);
 	input.addEventListener("keyup", handleenter);
 
 	stage = new createjs.Stage(canvas);
+	scorestage = new createjs.Stage(scoreboard);
 
 	messenger = new createjs.Text("Loading", "bold 24px Arial", "#000000");
 	messenger.maxWidth = 600;
@@ -111,8 +159,54 @@ function init(){
 	load();
 }
 
-function start(){
+function updatescoreboard_text(){
+	//this only updates the text file of the scoreboard: 
+	if(scores == []){
+		return;
+	}
+	scoreboard_text = [];
+	var field = new createjs.Text("Scoreboard", "bold 18px Arial","#000000");
+	field.textAlign = "center"
+	field.x = 300;
+	field.y = 20;
+	field.maxWidth = 1000;
+	scoreboard_text.push(field);
 
+	for(var i=0; i<scores.length; i++){
+		var str= (i+1)+". " + unescape(scores[i].name) 
+				+ "--------------------------------------------------------" 
+				+scores[i].score.toString();
+		var field= new createjs.Text(str, "bold 18px Arial", "#000000");
+		field.textAlign = "center"
+		field.x = 300;
+		field.y = scoreboard_text.length * 20 + 40;
+		field.maxWidth = 1000;
+		scoreboard_text.push(field);
+	}
+	console.log(scores)
+	console.log(scoreboard_text)
+	updatescoreboard_stage();
+}
+
+function updatescoreboard_stage(){
+	scorestage.removeAllChildren();
+	for(var i=0; i<scoreboard_text.length; i++){
+		scorestage.addChild(scoreboard_text[i]);
+	}
+	scorestage.update();
+}
+
+function start(){
+	// submit the last score
+	
+	if(!submitted && score > 2000){
+		submitscore(score, function(err){
+			submitted = true;
+			if(!err){
+				console.log("submit was good");
+			}
+		})
+	}
 	// reset some variables 
 	difficulty = 0; 
 	vel = 2
@@ -121,6 +215,11 @@ function start(){
 	alive = true;
 	score = 0;
 	bricks = [];
+	submitted = false;
+	highscore(function(data){
+		scores = data.score;
+		updatescoreboard_text();
+	})
 
 	// start putting things into the frame 
 
@@ -242,6 +341,8 @@ function gameover(){
 	stage.addChild(messenger);
 	canvas.onclick = handleclick;
 	stage.update();
+	
+
 
 }
 
