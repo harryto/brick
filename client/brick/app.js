@@ -199,7 +199,7 @@ function updatescoreboard_stage(){
 function start(){
 	// submit the last score
 	
-	if(!submitted && score > 2000){
+	if(score > 2000){
 		submitscore(score, function(err){
 			submitted = true;
 			if(!err){
