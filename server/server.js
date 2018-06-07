@@ -20,12 +20,14 @@ function submitscore(req, res){
 	}
 	var score = parseInt(req.body.score);
 	var name  = req.body.name;
+	console.log({name:name, score:score});
 	app.db.scores.insert({name:name, score:score}, function(err){
 		if(err){
 			console.log("failed to submit: "+ err);
 			res.send({error: "submit score internal error"});
 			return;
 		} 
+		res.send({success:true});
 	})
 }
 app.get("/", function(req,res){
@@ -36,7 +38,7 @@ app.post("/highScore", highscore);
 
 function highscore(req, res){
 	console.log("highscore asked");
-	app.db.scores.find({},{_id:0}).sort({score:-1}).limit(5).toArray(function(err, result){
+	app.db.scores.find({},{_id:0}).sort({score:-1}).limit(10).toArray(function(err, result){
 		if(err){
 			console.log("failed to find scores: " + err); 
 			res.send({error: "highscore internal error"});
